@@ -1,0 +1,20 @@
+//
+//  Prefix header
+//
+//  The contents of this file are implicitly included at the beginning of every source file.
+//
+
+#import <Availability.h>
+
+#ifndef __IPHONE_5_0
+#warning "This project uses features only available in iOS SDK 5.0 and later."
+#endif
+
+#ifdef __OBJC__
+    #import <UIKit/UIKit.h>
+    #import <Foundation/Foundation.h>
+#endif
+
+//  old 23542266-18D1-4FE4-B4A1-23F8195B9D39
+
+#define KUUID    @"B9407F30-F5F8-466E-AFF9-25556B57FE6D"
