@@ -7,10 +7,14 @@
 //
 
 #import "TrackViewController.h"
+#import <CloudKit/CloudKit.h>
 
 @interface TrackViewController ()
 @property (nonatomic,weak) IBOutlet UIImageView *imgView;
 @property (weak, nonatomic) IBOutlet UIButton *linkBtn;
+@property (weak, nonatomic) IBOutlet UILabel *productId;
+@property (nonatomic ,strong) CLBeacon *previousBeacon;
+@property (weak, nonatomic) IBOutlet UILabel *productDescription;
 @end
 
 @implementation TrackViewController
@@ -25,7 +29,6 @@
         [self.locationManager requestAlwaysAuthorization];
     }
     [self initRegion];
-    [self locationManager:self.locationManager didStartMonitoringForRegion:self.beaconRegion];
 }
 - (IBAction)linkAction:(id)sender {
     
@@ -33,9 +36,7 @@
     [[UIApplication sharedApplication] openURL:url];
 }
 
-- (void)locationManager:(CLLocationManager *)manager didStartMonitoringForRegion:(CLRegion *)region {
-    [self.locationManager startRangingBeaconsInRegion:self.beaconRegion];
-}
+
 
 - (void)initRegion {
     NSUUID *uuid = [[NSUUID alloc] initWithUUIDString:KUUID];
@@ -66,12 +67,15 @@
     
     if(state == CLRegionStateInside)
     {
-        [self setupLocalNotifications:@"CLRegionStateInside"];
+      //  [self setupLocalNotifications:@"CLRegionStateInside"];
+        [self.locationManager startRangingBeaconsInRegion:self.beaconRegion];
+
 
     }
     else if(state == CLRegionStateOutside)
     {
         [self setupLocalNotifications:@"CLRegionStateOutside"];
+        [self.locationManager stopRangingBeaconsInRegion:self.beaconRegion];
 
     }
 }
@@ -95,64 +99,16 @@
 
 -(void)locationManager:(CLLocationManager *)manager didRangeBeacons:(NSArray *)beacons inRegion:(CLBeaconRegion *)region {
     
-    NSMutableArray *Arr1 = [NSMutableArray array];
-    NSMutableArray *Arr2 = [NSMutableArray array];
-    NSMutableArray *Arr3 = [NSMutableArray array];
-    NSMutableArray *Arr4 = [NSMutableArray array];
-    NSMutableArray *sortedArray = [NSMutableArray array];
-    
-    if(beacons.count > 0) {
+        CLBeacon *beacon = beacons[0];
+        if (!self.previousBeacon) {
         
-        for (CLBeacon *beacon in beacons) {
-            
-            if (beacon.proximity == CLProximityImmediate) {
-                [Arr1 addObject:beacon];
-            }
-            
-            
-            if (beacon.proximity == CLProximityNear) {
-                [Arr2 addObject:beacon];
-                // Sort Arr2 based on Accurecy
+            self.previousBeacon = beacon;
+        }
+        else if ([self.previousBeacon.minor intValue] == [beacon.minor intValue]) {
                 
-            }
-            if (beacon.proximity == CLProximityFar) {
-                [Arr3 addObject:beacon];
-                // Sort Arr3 based on Accurecy
-                
-            }
-            if (beacon.proximity == CLProximityUnknown) {
-                [Arr4 addObject:beacon];
-                // Sort Arr4 based on Accurecy
-            }
+                return;
         }
-        if(Arr1.count > 0) {
-            Arr1 = [[self sortedGategoryItems:Arr1] mutableCopy];
-            [sortedArray addObjectsFromArray:Arr1];
-        }
-        if(Arr2.count > 0) {
-            Arr2 = [[self sortedGategoryItems:Arr2] mutableCopy];
-            [sortedArray addObjectsFromArray:Arr2];
-        }
-        if(Arr3.count > 0) {
-            Arr3 = [[self sortedGategoryItems:Arr3] mutableCopy];
-            [sortedArray addObjectsFromArray:Arr3];
-        }
-        if(Arr4.count > 0) {
-            Arr4 = [[self sortedGategoryItems:Arr4] mutableCopy];
-            [sortedArray addObjectsFromArray:Arr4];
-        }
-        
-        for (CLBeacon *beacon in beacons) {
-            NSLog(@"aucuracy=== %@",[NSString stringWithFormat:@"%f", beacon.accuracy]);
-        }
-        for (CLBeacon *beacon in sortedArray) {
-            NSLog(@"sortedArray aucuracy=== %@",[NSString stringWithFormat:@"%f", beacon.accuracy]);
-        }
-        
-         if(sortedArray.count > 0) {
-            
-             CLBeacon *beacon = sortedArray[0];
-             
+            self.previousBeacon = beacon;
             self.beaconFoundLabel.text = @"Yes";
             self.proximityUUIDLabel.text = beacon.proximityUUID.UUIDString;
             self.majorLabel.text = [NSString stringWithFormat:@"%@", beacon.major];
@@ -169,31 +125,124 @@
             }
             self.rssiLabel.text = [NSString stringWithFormat:@"%li", (long)beacon.rssi];
             
-            switch ([beacon.minor intValue]) {
-                case 16143:
-                    self.imgView.image = [UIImage imageNamed:@"1watch.jpg"];
-                    [self.linkBtn setTitle:@"http://www.apple.com/watch/" forState:UIControlStateNormal];
-                    break;
-                case 62952:
-                    self.imgView.image = [UIImage imageNamed:@"2iPhone6S.jpg"];
-                    [self.linkBtn setTitle:@"http://www.apple.com/iphone-6s/" forState:UIControlStateNormal];
+             
+             if (beacon.proximity == CLProximityNear || beacon.proximity == CLProximityImmediate) {
+                 
+                  switch ([beacon.minor intValue])
+                 {
+                     case 16143:{
+                         CKDatabase *database = [[CKContainer defaultContainer] publicCloudDatabase];
+                         NSPredicate *predicate = [NSPredicate predicateWithFormat:@"UUID = %@ AND Major = %@ AND Minor = %@", beacon.proximityUUID.UUIDString , [beacon.major stringValue] ,[beacon.minor stringValue]];
+                         CKQuery *query = [[CKQuery alloc] initWithRecordType:@"Beacon2" predicate:predicate];
+                         [database performQuery:query inZoneWithID:nil completionHandler:^(NSArray<CKRecord *> * _Nullable results, NSError * _Nullable error) {
+                             
+                             if (error) {
+                                 dispatch_async(dispatch_get_main_queue(), ^{
+                                     [self showAlertWithTitle:@"Fail" message:error.localizedDescription delegate:nil];
+                                     
+                                 });
+                             }
+                             else{
+                                 dispatch_async(dispatch_get_main_queue(), ^{
+                                     
+                                  //   [self showAlertWithTitle:[NSString stringWithFormat:@"%@", results[0].recordID] message:@"Record is successfully fetched" delegate:nil];
+                                     
+                                     CKRecord *record = results[0];
+                                     CKAsset *asset = [record objectForKey:@"ProductImage"];
+                                     self.productId.text  =  [record objectForKey:@"ProductID"];
+                                     self.productDescription.text  = [record objectForKey:@"Description"];
+                                     UIImage *image = [[UIImage alloc] initWithContentsOfFile:asset.fileURL.path];
+                                     self.imgView.image = image;
+                                 });
+                             }
+                         }];
+                     }
+                     //self.imgView.image = [UIImage imageNamed:@"1watch.jpg"];
+                     //  [self.linkBtn setTitle:@"http://www.apple.com/watch/" forState:UIControlStateNormal];
+                     break;
+                     case 62952:{
+                     //  self.imgView.image = [UIImage imageNamed:@"2iPhone6S.jpg"];
+                     //   [self.linkBtn setTitle:@"http://www.apple.com/iphone-6s/" forState:UIControlStateNormal];
+                         CKDatabase *database = [[CKContainer defaultContainer] publicCloudDatabase];
+                         NSPredicate *predicate = [NSPredicate predicateWithFormat:@"UUID = %@ AND Major = %@ AND Minor = %@", beacon.proximityUUID.UUIDString , [beacon.major stringValue] ,[beacon.minor stringValue]];
+                         CKQuery *query = [[CKQuery alloc] initWithRecordType:@"Beacon3" predicate:predicate];
+                         [database performQuery:query inZoneWithID:nil completionHandler:^(NSArray<CKRecord *> * _Nullable results, NSError * _Nullable error) {
+                             
+                             if (error) {
+                                 dispatch_async(dispatch_get_main_queue(), ^{
+                                     [self showAlertWithTitle:@"Fail" message:error.localizedDescription delegate:nil];
+                                     
+                                 });
+                             }
+                             else{
+                                 dispatch_async(dispatch_get_main_queue(), ^{
+                                     
+                                 //    [self showAlertWithTitle:[NSString stringWithFormat:@"%@", results[0].recordID] message:@"Record is successfully fetched" delegate:nil];
+                                     
+                                     CKRecord *record = results[0];
+                                     CKAsset *asset = [record objectForKey:@"ProductImage"];
+                                     self.productId.text  =  [record objectForKey:@"ProductID"];
+                                     self.productDescription.text  = [record objectForKey:@"Description"];
+                                     UIImage *image = [[UIImage alloc] initWithContentsOfFile:asset.fileURL.path];
+                                     self.imgView.image = image;
+                                 });
+                             }
+                         }];
+                 }
+                     
+                     break;
+                 case 40682:{
+                     //  self.imgView.image = [UIImage imageNamed:@"3macbook.jpg"];
+                     //  [self.linkBtn setTitle:@"http://www.apple.com/mac/" forState:UIControlStateNormal];
+                     
+                     CKDatabase *database = [[CKContainer defaultContainer] publicCloudDatabase];
+                     NSPredicate *predicate = [NSPredicate predicateWithFormat:@"UUID = %@ AND Major = %@ AND Minor = %@", beacon.proximityUUID.UUIDString , [beacon.major stringValue] ,[beacon.minor stringValue]];
+                     CKQuery *query = [[CKQuery alloc] initWithRecordType:@"Beacon1" predicate:predicate];
+                     [database performQuery:query inZoneWithID:nil completionHandler:^(NSArray<CKRecord *> * _Nullable results, NSError * _Nullable error) {
+                         
+                         if (error) {
+                             dispatch_async(dispatch_get_main_queue(), ^{
+                                 [self showAlertWithTitle:@"Fail" message:error.localizedDescription delegate:nil];
+                                 
+                             });
+                         }
+                         else{
+                             dispatch_async(dispatch_get_main_queue(), ^{
+                                 
+                             //    [self showAlertWithTitle:[NSString stringWithFormat:@"%@", results[0].recordID] message:@"Record is successfully fetched" delegate:nil];
+                                 
+                                 CKRecord *record = results[0];
+                                 CKAsset *asset = [record objectForKey:@"ProductImage"];
+                                 self.productId.text   =  [record objectForKey:@"ProductID"];
+                                 self.productDescription.text = [record objectForKey:@"Description"];
+                                 UIImage *image = [[UIImage alloc] initWithContentsOfFile:asset.fileURL.path];
+                                 self.imgView.image = image;
+                             });
+                         }
+                     }];
+                     
+                 }
+                     break;
+                     
+                 default:
+                     self.imgView.image = nil;
+                     [self.linkBtn setTitle:@"" forState:UIControlStateNormal];
+                     
+                     break;
+                 }
+             }
+}
 
-                    break;
-                case 40682:
-                    self.imgView.image = [UIImage imageNamed:@"3macbook.jpg"];
-                    [self.linkBtn setTitle:@"http://www.apple.com/mac/" forState:UIControlStateNormal];
-
-                    break;
-                    
-                default:
-                    self.imgView.image = nil;
-                    [self.linkBtn setTitle:@"" forState:UIControlStateNormal];
-
-                    break;
-            }
-            
-        }
-    }
+-(void)showAlertWithTitle:(NSString*)title message:(NSString*)message delegate:(id)delegate {
+    
+    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:title message:message preferredStyle:UIAlertControllerStyleAlert];
+    
+    UIAlertAction *action = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+        
+    }];
+    [alertController addAction:action];
+    [self presentViewController:alertController animated:YES completion:nil];
+    
 }
 
 - (NSArray *)sortedGategoryItems:(NSArray *)unsortedItems {
