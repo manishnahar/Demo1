@@ -10,4 +10,5 @@
 
 @interface ImageCollectionViewCell : UICollectionViewCell
  @property  (nonatomic , strong) IBOutlet UIImageView *imageview;
+@property (nonatomic) BOOL isImageVisible;
 @end

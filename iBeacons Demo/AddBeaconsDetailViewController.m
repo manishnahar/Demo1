@@ -9,6 +9,7 @@
 #import "AddBeaconsDetailViewController.h"
 #import <CloudKit/CloudKit.h>
 #import "ImageCollectionViewCell.h"
+#import "MBProgressHUD.h"
 
 @interface AddBeaconsDetailViewController ()
 @property (nonatomic , strong) UIImage *productImage;
@@ -159,6 +160,7 @@
         }
         ImageCollectionViewCell * cell = (ImageCollectionViewCell*)[self.collectionview cellForItemAtIndexPath:[[self.collectionview indexPathsForSelectedItems] objectAtIndex:0]];
         cell.imageview.image = self.productImage;
+        cell.isImageVisible = YES;
 
         self.imageView.image = self.productImage;
     }
@@ -186,6 +188,7 @@
 }
 - (IBAction)saveProductToCloud:(id)sender {
     
+    [MBProgressHUD showHUDAddedTo:self.view animated:YES];
     
     [[CKContainer defaultContainer] accountStatusWithCompletionHandler:^(CKAccountStatus accountStatus, NSError *error) {
         
@@ -204,39 +207,45 @@
                                                     handler:nil]];
             
             [self presentViewController:alert animated:YES completion:nil];
-            
+            [MBProgressHUD hideHUDForView:self.view animated:YES];
         }
         
         else {
             
             CKDatabase *database = [[CKContainer defaultContainer] publicCloudDatabase];
             CKRecordID *recordId = [[CKRecordID alloc] initWithRecordName: self.beaconInfo.beaconName];
-            CKRecord *record =[[CKRecord alloc] initWithRecordType:@"Product" recordID:recordId];
-            record[@"UUID" ] = self.beaconInfo.beaconUUID;
+            CKRecord *productRecord =[[CKRecord alloc] initWithRecordType:@"Product" recordID:recordId];
+            productRecord[@"UUID" ] = self.beaconInfo.beaconUUID;
             
-            record[@"Major"] = self.beaconInfo.major;
+            productRecord[@"Major"] = self.beaconInfo.major;
             
-            record[@"Minor"] = self.beaconInfo.minor;
+            productRecord[@"Minor"] = self.beaconInfo.minor;
             
-            record[@"ProductID"] = self.productIdTextField.text;
+            productRecord[@"ProductID"] = self.productIdTextField.text;
             
-            record[@"Description"] = self.descriptionView.text;
-            if (self.productImage) {
+            productRecord[@"Description"] = self.descriptionView.text;
+            
+            for (int i=0 ; i<6; i++) {
                 
-                NSString *docPath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)[0];
-                NSString *imagePath = [docPath stringByAppendingPathComponent:self.beaconInfo.beaconName];
-                NSData *imageData = UIImagePNGRepresentation(self.productImage);
-                [imageData writeToFile:imagePath atomically:YES];
-                NSURL *imageURL = [NSURL fileURLWithPath:imagePath];
-                CKAsset *productImage = [[CKAsset alloc] initWithFileURL:imageURL];
-                record[@"ProductImage"] = productImage;
+                ImageCollectionViewCell * cell = (ImageCollectionViewCell*)[self.collectionview cellForItemAtIndexPath:[NSIndexPath indexPathForItem:i inSection:0]];
+                if (cell.isImageVisible) {
+                    
+                    NSString *docPath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)[0];
+                    NSString *imagePath = [docPath stringByAppendingPathComponent:[NSString stringWithFormat:@"Image%d",i+1]];
+                    NSData *imageData = UIImagePNGRepresentation(cell.imageview.image);
+                    [imageData writeToFile:imagePath atomically:YES];
+                    NSURL *imageURL = [NSURL fileURLWithPath:imagePath];
+                    CKAsset *productImage = [[CKAsset alloc] initWithFileURL:imageURL];
+                    NSString *productImageKey = [NSString stringWithFormat:@"Image%d",i+1];
+                    productRecord[productImageKey] = productImage;
+                }
             }
-            
+
             [database fetchRecordWithID:recordId completionHandler:^(CKRecord * _Nullable record, NSError * _Nullable error) {
                 
                 if (error) {
                     
-                    [database saveRecord:record completionHandler:^(CKRecord * _Nullable record, NSError * _Nullable error) {
+                    [database saveRecord:productRecord completionHandler:^(CKRecord * _Nullable record, NSError * _Nullable error) {
                         
                         if (error) {
                             
@@ -245,35 +254,41 @@
                             dispatch_async(dispatch_get_main_queue(), ^{
                                 
                                 [self showAlertWithTitle:@"Success" message:@"Record is successfully saved" delegate:nil];
-                                
+                                [MBProgressHUD hideHUDForView:self.view animated:YES];
+
                             });
                         }
 
                     }];
                 }
                 else {
-                    if (self.productImage) {
+                    for (int i=0 ; i<7; i++) {
                         
-                        NSString *docPath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)[0];
-                        NSString *imagePath = [docPath stringByAppendingPathComponent:self.beaconInfo.beaconName];
-                        NSData *imageData = UIImagePNGRepresentation(self.productImage);
-                        [imageData writeToFile:imagePath atomically:YES];
-                        NSURL *imageURL = [NSURL fileURLWithPath:imagePath];
-                        CKAsset *productImage = [[CKAsset alloc] initWithFileURL:imageURL];
-                        record[@"ProductImage"] = productImage;
-                        record[@"ProductID"] = self.productIdTextField.text;
-                        record[@"Description"] = self.descriptionView.text;
+                        ImageCollectionViewCell * cell = (ImageCollectionViewCell*)[self.collectionview cellForItemAtIndexPath:[NSIndexPath indexPathForItem:i inSection:0]];
+                        if (cell.isImageVisible) {
+                            
+                            NSString *docPath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)[0];
+                            NSString *imagePath = [docPath stringByAppendingPathComponent:[NSString stringWithFormat:@"Image%d",i+1]];
+                            NSData *imageData = UIImagePNGRepresentation(cell.imageview.image);
+                            [imageData writeToFile:imagePath atomically:YES];
+                            NSURL *imageURL = [NSURL fileURLWithPath:imagePath];
+                            CKAsset *productImage = [[CKAsset alloc] initWithFileURL:imageURL];
+                            NSString *productImageKey = [NSString stringWithFormat:@"Image%d",i+1];
+                            record[productImageKey] = productImage;
+                        }
                     }
                 [database saveRecord:record completionHandler:^(CKRecord * _Nullable record, NSError * _Nullable error) {
 
                     if (error) {
-                        
+                        [MBProgressHUD hideHUDForView:self.view animated:YES];
+
                     }
                     else{
                         dispatch_async(dispatch_get_main_queue(), ^{
                             
                             [self showAlertWithTitle:@"Success" message:@"Record is successfully saved" delegate:nil];
-                            
+                            [MBProgressHUD hideHUDForView:self.view animated:YES];
+
                         });
                     }
                 }];
@@ -302,6 +317,31 @@
     [self pickPhoto:nil];
 }
 
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout
+  sizeForItemAtIndexPath:(NSIndexPath *)indexPath{
+    
+    UICollectionViewFlowLayout *flowLayout = (UICollectionViewFlowLayout*)collectionViewLayout;
+    if (collectionView.tag == 0) {
+        
+        CGFloat availableWidthForCells = CGRectGetWidth(collectionView.frame) - flowLayout.sectionInset.left - flowLayout.sectionInset.right - flowLayout.minimumInteritemSpacing * (3.0 - 1.0);
+        CGFloat cellWidth = availableWidthForCells / 3.0;
+        CGFloat availableHeightForCells = CGRectGetHeight(collectionView.frame) - flowLayout.sectionInset.top - flowLayout.sectionInset.bottom - flowLayout.minimumLineSpacing * (3.0 - 1.0);
+        CGFloat cellHeight = availableHeightForCells / 3.0;
+        
+        if([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad) {
+            
+            flowLayout.itemSize = CGSizeMake(cellWidth - 0.5, cellHeight);
+        }
+        else{
+            flowLayout.itemSize = CGSizeMake(cellWidth, cellHeight);
+        }
+        return flowLayout.itemSize;
+    }
+    else{
+        return collectionView.bounds.size;
+    }
+    
+}
 
 
 /*

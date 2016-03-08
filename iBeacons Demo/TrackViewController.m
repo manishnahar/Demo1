@@ -8,6 +8,8 @@
 
 #import "TrackViewController.h"
 #import <CloudKit/CloudKit.h>
+#import "DPScrollerPageControlViewController.h"
+#import "DPCollectionViewCell.h"
 
 @interface TrackViewController ()
 @property (nonatomic,weak) IBOutlet UIImageView *imgView;
@@ -15,6 +17,10 @@
 @property (weak, nonatomic) IBOutlet UILabel *productId;
 @property (nonatomic ,strong) CLBeacon *previousBeacon;
 @property (weak, nonatomic) IBOutlet UILabel *productDescription;
+@property (strong, nonatomic)  DPScrollerPageControlViewController *controller;
+@property (weak, nonatomic) IBOutlet UICollectionView *collectionView;
+@property (weak, nonatomic) IBOutlet DPScrollerPageControlView *scrollerPageControl;
+@property (strong , nonatomic) NSMutableArray *imageArray;
 @end
 
 @implementation TrackViewController
@@ -29,6 +35,8 @@
         [self.locationManager requestAlwaysAuthorization];
     }
     [self initRegion];
+    self.scrollerPageControl.viewDataSource = self;
+    self.imageArray = [NSMutableArray array];
 }
 - (IBAction)linkAction:(id)sender {
     
@@ -148,11 +156,16 @@
                                   //   [self showAlertWithTitle:[NSString stringWithFormat:@"%@", results[0].recordID] message:@"Record is successfully fetched" delegate:nil];
                                      
                                      CKRecord *record = results[0];
-                                     CKAsset *asset = [record objectForKey:@"ProductImage"];
-                                     self.productId.text  =  [record objectForKey:@"ProductID"];
-                                     self.productDescription.text  = [record objectForKey:@"Description"];
-                                     UIImage *image = [[UIImage alloc] initWithContentsOfFile:asset.fileURL.path];
-                                     self.imgView.image = image;
+                                     for (int i=0; i <6; i++ ) {
+                                         
+                                         CKAsset *asset = [record objectForKey:[NSString stringWithFormat:@"Image%d",i]];
+                                         if (asset) {
+                                             
+                                             [self.imageArray addObject:asset.fileURL.path];
+                                         }
+                                     }
+                                     self.productId.text   =  [record objectForKey:@"ProductID"];
+                                     self.productDescription.text = [record objectForKey:@"Description"];
                                  });
                              }
                          }];
@@ -180,11 +193,16 @@
                                  //    [self showAlertWithTitle:[NSString stringWithFormat:@"%@", results[0].recordID] message:@"Record is successfully fetched" delegate:nil];
                                      
                                      CKRecord *record = results[0];
-                                     CKAsset *asset = [record objectForKey:@"ProductImage"];
-                                     self.productId.text  =  [record objectForKey:@"ProductID"];
-                                     self.productDescription.text  = [record objectForKey:@"Description"];
-                                     UIImage *image = [[UIImage alloc] initWithContentsOfFile:asset.fileURL.path];
-                                     self.imgView.image = image;
+                                     for (int i=0; i <6; i++ ) {
+                                         
+                                         CKAsset *asset = [record objectForKey:[NSString stringWithFormat:@"Image%d",i]];
+                                         if (asset) {
+                                             
+                                             [self.imageArray addObject:asset.fileURL.path];
+                                         }
+                                     }
+                                     self.productId.text   =  [record objectForKey:@"ProductID"];
+                                     self.productDescription.text = [record objectForKey:@"Description"];
                                  });
                              }
                          }];
@@ -212,11 +230,17 @@
                              //    [self showAlertWithTitle:[NSString stringWithFormat:@"%@", results[0].recordID] message:@"Record is successfully fetched" delegate:nil];
                                  
                                  CKRecord *record = results[0];
-                                 CKAsset *asset = [record objectForKey:@"ProductImage"];
-                                 self.productId.text   =  [record objectForKey:@"ProductID"];
+                                 for (int i=0; i <6; i++ ) {
+                                     
+                                     CKAsset *asset = [record objectForKey:[NSString stringWithFormat:@"Image%d",i]];
+                                     if (asset) {
+                                         
+                                         [self.imageArray addObject:asset.fileURL.path];
+                                     }
+                                 }
+                                self.productId.text   =  [record objectForKey:@"ProductID"];
                                  self.productDescription.text = [record objectForKey:@"Description"];
-                                 UIImage *image = [[UIImage alloc] initWithContentsOfFile:asset.fileURL.path];
-                                 self.imgView.image = image;
+                                 
                              });
                          }
                      }];
@@ -311,6 +335,34 @@
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section{
+    
+    return  [self.imageArray count];
+}
+
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath{
+    
+    DPCollectionViewCell *collectionViewCell = [collectionView dequeueReusableCellWithReuseIdentifier:@"DPCollectionViewCell" forIndexPath:indexPath];
+    UIImage *image = [[UIImage alloc] initWithContentsOfFile:self.imageArray[indexPath.row]];
+    collectionViewCell.imageview.image = image;
+    return collectionViewCell;
+}
+
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout
+  sizeForItemAtIndexPath:(NSIndexPath *)indexPath{
+    
+    return CGSizeMake(collectionView.bounds.size.width, collectionView.bounds.size.height);
+}
+
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout minimumLineSpacingForSectionAtIndex:(NSInteger)section{
+    return 0;
+}
+
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout minimumInteritemSpacingForSectionAtIndex:(NSInteger)section{
+    return 0;
 }
 
 @end

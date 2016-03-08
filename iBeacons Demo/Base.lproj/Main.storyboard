@@ -161,6 +161,7 @@
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="gYC-Aq-rSq">
                                 <rect key="frame" x="3" y="408" width="313" height="160"/>
                                 <animations/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="UeK-cX-mhp">
                                     <size key="itemSize" width="75" height="75"/>
                                     <size key="headerReferenceSize" width="0.0" height="0.0"/>
@@ -374,6 +375,48 @@
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" pagingEnabled="YES" showsVerticalScrollIndicator="NO" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="4jb-M5-mPC">
+                                <rect key="frame" x="6" y="74" width="363" height="274"/>
+                                <animations/>
+                                <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" minimumLineSpacing="10" minimumInteritemSpacing="10" id="eft-Zc-JT8">
+                                    <size key="itemSize" width="358" height="274"/>
+                                    <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                                    <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                                    <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                                </collectionViewFlowLayout>
+                                <cells>
+                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="DPCollectionViewCell" id="LXZ-8r-7fr" customClass="DPCollectionViewCell">
+                                        <rect key="frame" x="0.0" y="0.0" width="358" height="274"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
+                                            <rect key="frame" x="0.0" y="0.0" width="358" height="274"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="DUt-nA-YkK">
+                                                    <rect key="frame" x="0.0" y="0.0" width="358" height="274"/>
+                                                    <animations/>
+                                                </imageView>
+                                            </subviews>
+                                            <animations/>
+                                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                        </view>
+                                        <animations/>
+                                        <constraints>
+                                            <constraint firstAttribute="trailingMargin" secondItem="DUt-nA-YkK" secondAttribute="trailing" constant="-8" id="1q1-f6-Ukb"/>
+                                            <constraint firstItem="DUt-nA-YkK" firstAttribute="top" secondItem="LXZ-8r-7fr" secondAttribute="topMargin" constant="-8" id="T8M-PY-b8I"/>
+                                            <constraint firstItem="DUt-nA-YkK" firstAttribute="leading" secondItem="LXZ-8r-7fr" secondAttribute="leadingMargin" constant="-8" id="VeA-rE-OhN"/>
+                                            <constraint firstAttribute="bottomMargin" secondItem="DUt-nA-YkK" secondAttribute="bottom" constant="-8" id="smR-Kp-10y"/>
+                                        </constraints>
+                                        <connections>
+                                            <outlet property="imageview" destination="DUt-nA-YkK" id="FDJ-Nt-jnB"/>
+                                        </connections>
+                                    </collectionViewCell>
+                                </cells>
+                                <connections>
+                                    <outlet property="dataSource" destination="6LL-F7-gTY" id="ghT-7t-gzh"/>
+                                    <outlet property="delegate" destination="6LL-F7-gTY" id="c4s-vz-UkD"/>
+                                </connections>
+                            </collectionView>
                         </subviews>
                         <animations/>
                         <color key="backgroundColor" red="0.66666666669999997" green="0.81568627449999997" blue="0.85882352939999995" alpha="1" colorSpace="calibratedRGB"/>
@@ -400,6 +443,7 @@
                     <connections>
                         <outlet property="accuracyLabel" destination="lSG-Ey-sMQ" id="bdU-LY-amj"/>
                         <outlet property="beaconFoundLabel" destination="d1b-rE-bwu" id="FfE-jl-cet"/>
+                        <outlet property="collectionView" destination="4jb-M5-mPC" id="h03-54-f6A"/>
                         <outlet property="distanceLabel" destination="m7O-uB-gYC" id="P5S-kF-aUM"/>
                         <outlet property="imgView" destination="03g-cM-QcQ" id="rbA-CE-LH4"/>
                         <outlet property="linkBtn" destination="Z1e-Fb-Bpz" id="1Qx-XT-kqo"/>
