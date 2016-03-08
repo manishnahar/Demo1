@@ -8,7 +8,6 @@
 
 #import "TrackViewController.h"
 #import <CloudKit/CloudKit.h>
-#import "DPScrollerPageControlViewController.h"
 #import "DPCollectionViewCell.h"
 
 @interface TrackViewController ()
@@ -17,9 +16,7 @@
 @property (weak, nonatomic) IBOutlet UILabel *productId;
 @property (nonatomic ,strong) CLBeacon *previousBeacon;
 @property (weak, nonatomic) IBOutlet UILabel *productDescription;
-@property (strong, nonatomic)  DPScrollerPageControlViewController *controller;
 @property (weak, nonatomic) IBOutlet UICollectionView *collectionView;
-@property (weak, nonatomic) IBOutlet DPScrollerPageControlView *scrollerPageControl;
 @property (strong , nonatomic) NSMutableArray *imageArray;
 @end
 
@@ -35,7 +32,6 @@
         [self.locationManager requestAlwaysAuthorization];
     }
     [self initRegion];
-    self.scrollerPageControl.viewDataSource = self;
     self.imageArray = [NSMutableArray array];
 }
 - (IBAction)linkAction:(id)sender {
