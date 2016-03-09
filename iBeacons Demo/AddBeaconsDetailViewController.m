@@ -103,6 +103,7 @@
 -(IBAction)pickPhoto:(id)sender{
     
     UIAlertController *alertController = [UIAlertController alertControllerWithTitle:nil message:@"Select One" preferredStyle:UIAlertControllerStyleActionSheet];
+    alertController.popoverPresentationController.sourceView = self.view;
    
     UIAlertAction *action = [UIAlertAction actionWithTitle:@"Take Photo" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         
@@ -194,6 +195,11 @@
         
         if (accountStatus == CKAccountStatusNoAccount) {
             
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [MBProgressHUD hideHUDForView:self.view animated:YES];
+
+            });
+            
             UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Sign in to iCloud"
                                         
                                                                            message:@"Sign in to your iCloud account to write records. On the Home screen, launch Settings, tap iCloud, and enter your Apple ID. Turn iCloud Drive on. If you don't have an iCloud account, tap Create a new Apple ID."
@@ -207,7 +213,6 @@
                                                     handler:nil]];
             
             [self presentViewController:alert animated:YES completion:nil];
-            [MBProgressHUD hideHUDForView:self.view animated:YES];
         }
         
         else {

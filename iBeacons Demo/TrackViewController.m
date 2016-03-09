@@ -9,6 +9,7 @@
 #import "TrackViewController.h"
 #import <CloudKit/CloudKit.h>
 #import "DPCollectionViewCell.h"
+#import "MBProgressHUD.h"
 
 @interface TrackViewController ()
 @property (nonatomic,weak) IBOutlet UIImageView *imgView;
@@ -33,6 +34,7 @@
     }
     [self initRegion];
     self.imageArray = [NSMutableArray array];
+    
 }
 - (IBAction)linkAction:(id)sender {
     
@@ -132,116 +134,200 @@
              
              if (beacon.proximity == CLProximityNear || beacon.proximity == CLProximityImmediate) {
                  
+                 NSFileManager *fileManager = [NSFileManager defaultManager];
+                 NSString *docPath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)[0];
                   switch ([beacon.minor intValue])
                  {
                      case 16143:{
-                         CKDatabase *database = [[CKContainer defaultContainer] publicCloudDatabase];
-                         NSPredicate *predicate = [NSPredicate predicateWithFormat:@"UUID = %@ AND Major = %@ AND Minor = %@", beacon.proximityUUID.UUIDString , [beacon.major stringValue] ,[beacon.minor stringValue]];
-                         CKQuery *query = [[CKQuery alloc] initWithRecordType:@"Beacon2" predicate:predicate];
-                         [database performQuery:query inZoneWithID:nil completionHandler:^(NSArray<CKRecord *> * _Nullable results, NSError * _Nullable error) {
-                             
-                             if (error) {
-                                 dispatch_async(dispatch_get_main_queue(), ^{
-                                     [self showAlertWithTitle:@"Fail" message:error.localizedDescription delegate:nil];
-                                     
-                                 });
-                             }
-                             else{
-                                 dispatch_async(dispatch_get_main_queue(), ^{
-                                     
-                                  //   [self showAlertWithTitle:[NSString stringWithFormat:@"%@", results[0].recordID] message:@"Record is successfully fetched" delegate:nil];
-                                     
-                                     CKRecord *record = results[0];
-                                     for (int i=0; i <6; i++ ) {
+                        
+                         NSString *dirPath = [docPath stringByAppendingPathComponent:@"Beacon2"];
+                         BOOL isDir;
+                         if (![fileManager fileExistsAtPath:dirPath isDirectory:&isDir]) {
+                             [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+                             CKDatabase *database = [[CKContainer defaultContainer] publicCloudDatabase];
+                             CKRecordID *recordId = [[CKRecordID alloc] initWithRecordName: @"Beacon2"];
+                             [database fetchRecordWithID:recordId completionHandler:^(CKRecord * _Nullable record, NSError * _Nullable error) {
+                                 
+                                 if (error) {
+                                     dispatch_async(dispatch_get_main_queue(), ^{
+                                         [MBProgressHUD hideHUDForView:self.view animated:YES];
+                                         [self showAlertWithTitle:@"Fail" message:error.localizedDescription delegate:nil];
                                          
-                                         CKAsset *asset = [record objectForKey:[NSString stringWithFormat:@"Image%d",i]];
-                                         if (asset) {
+                                     });
+                                 }
+                                 else{
+                                     dispatch_async(dispatch_get_main_queue(), ^{
+                                         
+                                         //   [self showAlertWithTitle:[NSString stringWithFormat:@"%@", results[0].recordID] message:@"Record is successfully fetched" delegate:nil];
+                                         [self.imageArray removeAllObjects];
+                                         //CKRecord *record = results[0];
+                                         for (int i=0; i <6; i++ ) {
                                              
-                                             [self.imageArray addObject:asset.fileURL.path];
+                                             CKAsset *asset = [record objectForKey:[NSString stringWithFormat:@"Image%d",i]];
+                                             if (asset) {
+                                                 
+                                                 NSString *dirPath = [docPath stringByAppendingPathComponent:@"Beacon2"];
+                                                 BOOL isDir1;
+                                                 if (![fileManager fileExistsAtPath:dirPath isDirectory:&isDir1]) {
+                                                     
+                                                     [fileManager createDirectoryAtPath:dirPath withIntermediateDirectories:NO attributes:nil error:nil];
+                                                 }
+                                                 NSString *imagePath = [dirPath stringByAppendingPathComponent:[NSString stringWithFormat:@"Image%d",i+1]];
+                                                 [fileManager copyItemAtPath:asset.fileURL.path toPath:imagePath error:nil];
+                                                 
+                                                 [self.imageArray addObject:imagePath];
+                                             }
                                          }
-                                     }
-                                     self.productId.text   =  [record objectForKey:@"ProductID"];
-                                     self.productDescription.text = [record objectForKey:@"Description"];
-                                 });
+                                         
+                                         
+                                         [MBProgressHUD hideHUDForView:self.view animated:YES];
+                                         self.productId.text   =  [record objectForKey:@"ProductID"];
+                                         self.productDescription.text = [record objectForKey:@"Description"];
+                                         [self.collectionView reloadData];
+                                         
+                                         
+                                     });
+                                 }
+                             }];
+                         }
+                         else{
+                              [self.imageArray removeAllObjects];
+                             NSArray *images = [fileManager contentsOfDirectoryAtPath:dirPath error:nil];
+                             for (NSString *image in images) {
+                                 
+                                 [self.imageArray addObject:[dirPath stringByAppendingPathComponent:image]];
                              }
-                         }];
+                             [self.collectionView reloadData];
+                         }
                      }
                      //self.imgView.image = [UIImage imageNamed:@"1watch.jpg"];
                      //  [self.linkBtn setTitle:@"http://www.apple.com/watch/" forState:UIControlStateNormal];
                      break;
                      case 62952:{
-                     //  self.imgView.image = [UIImage imageNamed:@"2iPhone6S.jpg"];
-                     //   [self.linkBtn setTitle:@"http://www.apple.com/iphone-6s/" forState:UIControlStateNormal];
-                         CKDatabase *database = [[CKContainer defaultContainer] publicCloudDatabase];
-                         NSPredicate *predicate = [NSPredicate predicateWithFormat:@"UUID = %@ AND Major = %@ AND Minor = %@", beacon.proximityUUID.UUIDString , [beacon.major stringValue] ,[beacon.minor stringValue]];
-                         CKQuery *query = [[CKQuery alloc] initWithRecordType:@"Beacon3" predicate:predicate];
-                         [database performQuery:query inZoneWithID:nil completionHandler:^(NSArray<CKRecord *> * _Nullable results, NSError * _Nullable error) {
-                             
-                             if (error) {
-                                 dispatch_async(dispatch_get_main_queue(), ^{
-                                     [self showAlertWithTitle:@"Fail" message:error.localizedDescription delegate:nil];
-                                     
-                                 });
-                             }
-                             else{
-                                 dispatch_async(dispatch_get_main_queue(), ^{
-                                     
-                                 //    [self showAlertWithTitle:[NSString stringWithFormat:@"%@", results[0].recordID] message:@"Record is successfully fetched" delegate:nil];
-                                     
-                                     CKRecord *record = results[0];
-                                     for (int i=0; i <6; i++ ) {
-                                         
-                                         CKAsset *asset = [record objectForKey:[NSString stringWithFormat:@"Image%d",i]];
-                                         if (asset) {
-                                             
-                                             [self.imageArray addObject:asset.fileURL.path];
-                                         }
-                                     }
-                                     self.productId.text   =  [record objectForKey:@"ProductID"];
-                                     self.productDescription.text = [record objectForKey:@"Description"];
-                                 });
-                             }
-                         }];
-                 }
-                     
-                     break;
-                 case 40682:{
-                     //  self.imgView.image = [UIImage imageNamed:@"3macbook.jpg"];
-                     //  [self.linkBtn setTitle:@"http://www.apple.com/mac/" forState:UIControlStateNormal];
-                     
-                     CKDatabase *database = [[CKContainer defaultContainer] publicCloudDatabase];
-                     NSPredicate *predicate = [NSPredicate predicateWithFormat:@"UUID = %@ AND Major = %@ AND Minor = %@", beacon.proximityUUID.UUIDString , [beacon.major stringValue] ,[beacon.minor stringValue]];
-                     CKQuery *query = [[CKQuery alloc] initWithRecordType:@"Beacon1" predicate:predicate];
-                     [database performQuery:query inZoneWithID:nil completionHandler:^(NSArray<CKRecord *> * _Nullable results, NSError * _Nullable error) {
                          
-                         if (error) {
-                             dispatch_async(dispatch_get_main_queue(), ^{
-                                 [self showAlertWithTitle:@"Fail" message:error.localizedDescription delegate:nil];
+                         NSString *dirPath = [docPath stringByAppendingPathComponent:@"Beacon3"];
+                         BOOL isDir;
+                         if (![fileManager fileExistsAtPath:dirPath isDirectory:&isDir]) {
+                             [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+                             CKDatabase *database = [[CKContainer defaultContainer] publicCloudDatabase];
+                             CKRecordID *recordId = [[CKRecordID alloc] initWithRecordName: @"Beacon3"];
+                             [database fetchRecordWithID:recordId completionHandler:^(CKRecord * _Nullable record, NSError * _Nullable error) {
                                  
-                             });
+                                 if (error) {
+                                     dispatch_async(dispatch_get_main_queue(), ^{
+                                         [MBProgressHUD hideHUDForView:self.view animated:YES];
+                                         [self showAlertWithTitle:@"Fail" message:error.localizedDescription delegate:nil];
+                                         
+                                     });
+                                 }
+                                 else{
+                                     dispatch_async(dispatch_get_main_queue(), ^{
+                                         
+                                         //   [self showAlertWithTitle:[NSString stringWithFormat:@"%@", results[0].recordID] message:@"Record is successfully fetched" delegate:nil];
+                                         [self.imageArray removeAllObjects];
+                                         //CKRecord *record = results[0];
+                                         for (int i=0; i <6; i++ ) {
+                                             
+                                             CKAsset *asset = [record objectForKey:[NSString stringWithFormat:@"Image%d",i]];
+                                             if (asset) {
+                                                 
+                                                 NSString *dirPath = [docPath stringByAppendingPathComponent:@"Beacon3"];
+                                                 BOOL isDir1;
+                                                 if (![fileManager fileExistsAtPath:dirPath isDirectory:&isDir1]) {
+                                                     
+                                                     [fileManager createDirectoryAtPath:dirPath withIntermediateDirectories:NO attributes:nil error:nil];
+                                                 }
+                                                 NSString *imagePath = [dirPath stringByAppendingPathComponent:[NSString stringWithFormat:@"Image%d",i+1]];
+                                                 [fileManager copyItemAtPath:asset.fileURL.path toPath:imagePath error:nil];
+                                                 
+                                                 [self.imageArray addObject:imagePath];
+                                             }
+                                         }
+                                         
+                                         
+                                         [MBProgressHUD hideHUDForView:self.view animated:YES];
+                                         self.productId.text   =  [record objectForKey:@"ProductID"];
+                                         self.productDescription.text = [record objectForKey:@"Description"];
+                                         [self.collectionView reloadData];
+                                         
+                                         
+                                     });
+                                 }
+                             }];
                          }
                          else{
-                             dispatch_async(dispatch_get_main_queue(), ^{
+                              [self.imageArray removeAllObjects];
+                             NSArray *images = [fileManager contentsOfDirectoryAtPath:dirPath error:nil];
+                             for (NSString *image in images) {
                                  
-                             //    [self showAlertWithTitle:[NSString stringWithFormat:@"%@", results[0].recordID] message:@"Record is successfully fetched" delegate:nil];
-                                 
-                                 CKRecord *record = results[0];
-                                 for (int i=0; i <6; i++ ) {
-                                     
-                                     CKAsset *asset = [record objectForKey:[NSString stringWithFormat:@"Image%d",i]];
-                                     if (asset) {
-                                         
-                                         [self.imageArray addObject:asset.fileURL.path];
-                                     }
-                                 }
-                                self.productId.text   =  [record objectForKey:@"ProductID"];
-                                 self.productDescription.text = [record objectForKey:@"Description"];
-                                 
-                             });
+                                 [self.imageArray addObject:[dirPath stringByAppendingPathComponent:image]];
+                             }
+                             [self.collectionView reloadData];
                          }
-                     }];
+                     }
                      
-                 }
+                     break;
+                     case 40682:{
+                         NSString *dirPath = [docPath stringByAppendingPathComponent:@"Beacon1"];
+                         BOOL isDir;
+                         if (![fileManager fileExistsAtPath:dirPath isDirectory:&isDir]) {
+                             [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+                             CKDatabase *database = [[CKContainer defaultContainer] publicCloudDatabase];
+                             CKRecordID *recordId = [[CKRecordID alloc] initWithRecordName: @"Beacon1"];
+                             [database fetchRecordWithID:recordId completionHandler:^(CKRecord * _Nullable record, NSError * _Nullable error) {
+                                 
+                                 if (error) {
+                                     dispatch_async(dispatch_get_main_queue(), ^{
+                                         [MBProgressHUD hideHUDForView:self.view animated:YES];
+                                         [self showAlertWithTitle:@"Fail" message:error.localizedDescription delegate:nil];
+                                         
+                                     });
+                                 }
+                                 else{
+                                     dispatch_async(dispatch_get_main_queue(), ^{
+                                         
+                                         //   [self showAlertWithTitle:[NSString stringWithFormat:@"%@", results[0].recordID] message:@"Record is successfully fetched" delegate:nil];
+                                         [self.imageArray removeAllObjects];
+                                         //CKRecord *record = results[0];
+                                         for (int i=0; i <6; i++ ) {
+                                             
+                                             CKAsset *asset = [record objectForKey:[NSString stringWithFormat:@"Image%d",i]];
+                                             if (asset) {
+                                                 
+                                                 NSString *dirPath = [docPath stringByAppendingPathComponent:@"Beacon1"];
+                                                 BOOL isDir1;
+                                                 if (![fileManager fileExistsAtPath:dirPath isDirectory:&isDir1]) {
+                                                     
+                                                     [fileManager createDirectoryAtPath:dirPath withIntermediateDirectories:NO attributes:nil error:nil];
+                                                 }
+                                                 NSString *imagePath = [dirPath stringByAppendingPathComponent:[NSString stringWithFormat:@"Image%d",i+1]];
+                                                 [fileManager copyItemAtPath:asset.fileURL.path toPath:imagePath error:nil];
+                                                 
+                                                 [self.imageArray addObject:imagePath];
+                                             }
+                                         }
+                                         
+                                         
+                                         [MBProgressHUD hideHUDForView:self.view animated:YES];
+                                         self.productId.text   =  [record objectForKey:@"ProductID"];
+                                         self.productDescription.text = [record objectForKey:@"Description"];
+                                         [self.collectionView reloadData];
+                                         
+                                         
+                                     });
+                                 }
+                             }];
+                         }
+                         else{
+                             [self.imageArray removeAllObjects];
+                             NSArray *images = [fileManager contentsOfDirectoryAtPath:dirPath error:nil];
+                             for (NSString *image in images) {
+                                 
+                                 [self.imageArray addObject:[dirPath stringByAppendingPathComponent:image]];
+                             }
+                             [self.collectionView reloadData];
+                         }
+                     }
                      break;
                      
                  default:
@@ -342,8 +428,12 @@
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath{
     
     DPCollectionViewCell *collectionViewCell = [collectionView dequeueReusableCellWithReuseIdentifier:@"DPCollectionViewCell" forIndexPath:indexPath];
-    UIImage *image = [[UIImage alloc] initWithContentsOfFile:self.imageArray[indexPath.row]];
-    collectionViewCell.imageview.image = image;
+    if (self.imageArray.count > 0) {
+      
+        UIImage *image = [[UIImage alloc] initWithContentsOfFile:self.imageArray[indexPath.row]];
+        collectionViewCell.imageview.image = image;
+    }
+    
     return collectionViewCell;
 }
 
