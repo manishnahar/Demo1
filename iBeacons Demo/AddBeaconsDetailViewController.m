@@ -267,7 +267,7 @@
                     }];
                 }
                 else {
-                    for (int i=0 ; i<7; i++) {
+                    for (int i=0 ; i<6; i++) {
                         
                         ImageCollectionViewCell * cell = (ImageCollectionViewCell*)[self.collectionview cellForItemAtIndexPath:[NSIndexPath indexPathForItem:i inSection:0]];
                         if (cell.isImageVisible) {
