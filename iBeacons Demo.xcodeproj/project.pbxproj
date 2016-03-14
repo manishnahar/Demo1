@@ -7,17 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		BA26525F1C92CA0300E3C694 /* imageplace.png in Resources */ = {isa = PBXBuildFile; fileRef = BA26525E1C92CA0300E3C694 /* imageplace.png */; };
 		BA2F38091C8D86BD000126B6 /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = BA2F38081C8D86BD000126B6 /* MBProgressHUD.m */; };
 		BA2F38161C8DC139000126B6 /* DPCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = BA2F380F1C8DC139000126B6 /* DPCollectionViewCell.m */; };
 		BA54FCC11C89575A0022F13F /* ImageCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = BA54FCC01C89575A0022F13F /* ImageCollectionViewCell.m */; };
-		BA54FCC31C895F6C0022F13F /* imageplace.png in Resources */ = {isa = PBXBuildFile; fileRef = BA54FCC21C895F6C0022F13F /* imageplace.png */; };
 		BA9BBE321C859617002EFC1F /* BeaconsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BA9BBE311C859617002EFC1F /* BeaconsViewController.m */; };
 		BA9BBE351C85A32B002EFC1F /* AddBeaconsDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BA9BBE341C85A32B002EFC1F /* AddBeaconsDetailViewController.m */; };
 		BA9BBE381C85B28B002EFC1F /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BA9BBE371C85B28B002EFC1F /* CloudKit.framework */; };
 		BA9BBE3B1C85CACA002EFC1F /* BeaconsInformation.m in Sources */ = {isa = PBXBuildFile; fileRef = BA9BBE3A1C85CACA002EFC1F /* BeaconsInformation.m */; };
-		BA9BBE3F1C85D1C9002EFC1F /* Beacon1.png in Resources */ = {isa = PBXBuildFile; fileRef = BA9BBE3C1C85D1C9002EFC1F /* Beacon1.png */; };
-		BA9BBE401C85D1C9002EFC1F /* Beacon2.png in Resources */ = {isa = PBXBuildFile; fileRef = BA9BBE3D1C85D1C9002EFC1F /* Beacon2.png */; };
-		BA9BBE411C85D1C9002EFC1F /* Beacon3.png in Resources */ = {isa = PBXBuildFile; fileRef = BA9BBE3E1C85D1C9002EFC1F /* Beacon3.png */; };
 		C9AF590017F5678D00792F91 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9AF58FF17F5678D00792F91 /* Foundation.framework */; };
 		C9AF590217F5678D00792F91 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9AF590117F5678D00792F91 /* CoreGraphics.framework */; };
 		C9AF590417F5678D00792F91 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9AF590317F5678D00792F91 /* UIKit.framework */; };
@@ -43,13 +40,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		BA26525E1C92CA0300E3C694 /* imageplace.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = imageplace.png; path = Images.xcassets/imageplace.imageset/imageplace.png; sourceTree = "<group>"; };
 		BA2F38071C8D86BD000126B6 /* MBProgressHUD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MBProgressHUD.h; sourceTree = "<group>"; };
 		BA2F38081C8D86BD000126B6 /* MBProgressHUD.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MBProgressHUD.m; sourceTree = "<group>"; };
 		BA2F380E1C8DC139000126B6 /* DPCollectionViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DPCollectionViewCell.h; sourceTree = "<group>"; };
 		BA2F380F1C8DC139000126B6 /* DPCollectionViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DPCollectionViewCell.m; sourceTree = "<group>"; };
 		BA54FCBF1C89575A0022F13F /* ImageCollectionViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImageCollectionViewCell.h; sourceTree = "<group>"; };
 		BA54FCC01C89575A0022F13F /* ImageCollectionViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ImageCollectionViewCell.m; sourceTree = "<group>"; };
-		BA54FCC21C895F6C0022F13F /* imageplace.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = imageplace.png; sourceTree = "<group>"; };
 		BA9BBE301C859617002EFC1F /* BeaconsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BeaconsViewController.h; sourceTree = "<group>"; };
 		BA9BBE311C859617002EFC1F /* BeaconsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BeaconsViewController.m; sourceTree = "<group>"; };
 		BA9BBE331C85A32B002EFC1F /* AddBeaconsDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AddBeaconsDetailViewController.h; sourceTree = "<group>"; };
@@ -58,9 +55,6 @@
 		BA9BBE371C85B28B002EFC1F /* CloudKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CloudKit.framework; path = System/Library/Frameworks/CloudKit.framework; sourceTree = SDKROOT; };
 		BA9BBE391C85CACA002EFC1F /* BeaconsInformation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BeaconsInformation.h; sourceTree = "<group>"; };
 		BA9BBE3A1C85CACA002EFC1F /* BeaconsInformation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BeaconsInformation.m; sourceTree = "<group>"; };
-		BA9BBE3C1C85D1C9002EFC1F /* Beacon1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Beacon1.png; path = Images.xcassets/Beacon1.imageset/Beacon1.png; sourceTree = "<group>"; };
-		BA9BBE3D1C85D1C9002EFC1F /* Beacon2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Beacon2.png; path = Images.xcassets/Beacon2.imageset/Beacon2.png; sourceTree = "<group>"; };
-		BA9BBE3E1C85D1C9002EFC1F /* Beacon3.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Beacon3.png; path = Images.xcassets/Beacon3.imageset/Beacon3.png; sourceTree = "<group>"; };
 		C9AF58FC17F5678D00792F91 /* iBeacons Demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "iBeacons Demo.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C9AF58FF17F5678D00792F91 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		C9AF590117F5678D00792F91 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -180,12 +174,9 @@
 			isa = PBXGroup;
 			children = (
 				C9AF591717F5678D00792F91 /* Images.xcassets */,
-				BA54FCC21C895F6C0022F13F /* imageplace.png */,
 				D4E1E3F11BAC087800690D3A /* 2iPhone6S.jpg */,
-				BA9BBE3C1C85D1C9002EFC1F /* Beacon1.png */,
-				BA9BBE3D1C85D1C9002EFC1F /* Beacon2.png */,
-				BA9BBE3E1C85D1C9002EFC1F /* Beacon3.png */,
 				D4E1E3F01BAC087800690D3A /* 1watch.jpg */,
+				BA26525E1C92CA0300E3C694 /* imageplace.png */,
 				D4E1E3F21BAC087800690D3A /* 3macbook.jpg */,
 				D49962EB1B53F26A0065601B /* 4apjabdulkalam.png */,
 				D49962EC1B53F26A0065601B /* 3bhagatsingh.png */,
@@ -284,19 +275,16 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BA9BBE3F1C85D1C9002EFC1F /* Beacon1.png in Resources */,
 				C9AF591817F5678D00792F91 /* Images.xcassets in Resources */,
 				D49962F01B53F26A0065601B /* 4apjabdulkalam.png in Resources */,
 				D49962F31B53F26A0065601B /* 1mahatma.png in Resources */,
 				D4E1E3F31BAC087800690D3A /* 1watch.jpg in Resources */,
+				BA26525F1C92CA0300E3C694 /* imageplace.png in Resources */,
 				D426C4FF1BAC170C00E73A87 /* LaunchScreen.xib in Resources */,
 				D4E1E3F41BAC087800690D3A /* 2iPhone6S.jpg in Resources */,
 				D49962F21B53F26A0065601B /* 2bose.png in Resources */,
-				BA9BBE411C85D1C9002EFC1F /* Beacon3.png in Resources */,
-				BA54FCC31C895F6C0022F13F /* imageplace.png in Resources */,
 				D4E1E3F51BAC087800690D3A /* 3macbook.jpg in Resources */,
 				D49962F41B53F26A0065601B /* mangalpandey.png in Resources */,
-				BA9BBE401C85D1C9002EFC1F /* Beacon2.png in Resources */,
 				C9AF590A17F5678D00792F91 /* InfoPlist.strings in Resources */,
 				C9AF591317F5678D00792F91 /* Main.storyboard in Resources */,
 				D49962F11B53F26A0065601B /* 3bhagatsingh.png in Resources */,

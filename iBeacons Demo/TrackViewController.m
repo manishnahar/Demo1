@@ -37,71 +37,77 @@
     }
     [self initRegion];
     self.imageArray = [NSMutableArray array];
-//    {
-//        NSFileManager *fileManager = [NSFileManager defaultManager];
-//        NSString *docPath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)[0];
-//        NSString *dirPath = [docPath stringByAppendingPathComponent:@"Beacon2"];
-//        BOOL isDir;
-//        if (![fileManager fileExistsAtPath:dirPath isDirectory:&isDir]) {
-//            [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-//            CKDatabase *database = [[CKContainer defaultContainer] publicCloudDatabase];
-//            CKRecordID *recordId = [[CKRecordID alloc] initWithRecordName: @"Beacon2"];
-//            [database fetchRecordWithID:recordId completionHandler:^(CKRecord * _Nullable record, NSError * _Nullable error) {
-//                
-//                if (error) {
-//                    dispatch_async(dispatch_get_main_queue(), ^{
-//                        [MBProgressHUD hideHUDForView:self.view animated:YES];
-//                        [self showAlertWithTitle:@"Fail" message:error.localizedDescription delegate:nil];
-//                        
-//                    });
-//                }
-//                else{
-//                    dispatch_async(dispatch_get_main_queue(), ^{
-//                        
-//                        //   [self showAlertWithTitle:[NSString stringWithFormat:@"%@", results[0].recordID] message:@"Record is successfully fetched" delegate:nil];
-//                        [self.imageArray removeAllObjects];
-//                        //CKRecord *record = results[0];
-//                        for (int i=0; i <6; i++ ) {
-//                            
-//                            CKAsset *asset = [record objectForKey:[NSString stringWithFormat:@"Image%d",i+1]];
-//                            if (asset) {
-//                                
-//                                NSString *dirPath = [docPath stringByAppendingPathComponent:@"Beacon2"];
-//                                BOOL isDir1;
-//                                if (![fileManager fileExistsAtPath:dirPath isDirectory:&isDir1]) {
-//                                    
-//                                    [fileManager createDirectoryAtPath:dirPath withIntermediateDirectories:NO attributes:nil error:nil];
-//                                }
-//                                NSString *imagePath = [dirPath stringByAppendingPathComponent:[NSString stringWithFormat:@"Image%d",i+1]];
-//                                [fileManager copyItemAtPath:asset.fileURL.path toPath:imagePath error:nil];
-//                                
-//                                [self.imageArray addObject:imagePath];
-//                            }
-//                        }
-//                        
-//                        
-//                        [MBProgressHUD hideHUDForView:self.view animated:YES];
-//                        self.productId.text   =  @"Beacon2";
-//                        self.productDescription.text = [record objectForKey:@"Description"];
-//                        self.pageControl.numberOfPages = self.imageArray.count;
-//                        [self.collectionView reloadData];
-//                        
-//                        
-//                    });
-//                }
-//            }];
-//        }
-//        else{
-//            [self.imageArray removeAllObjects];
-//            NSArray *images = [fileManager contentsOfDirectoryAtPath:dirPath error:nil];
-//            for (NSString *image in images) {
-//                
-//                [self.imageArray addObject:[dirPath stringByAppendingPathComponent:image]];
-//            }
-//             self.pageControl.numberOfPages = self.imageArray.count;
-//            [self.collectionView reloadData];
-//        }
-//    }
+    self.pageControl.numberOfPages = 0;
+    {
+        NSFileManager *fileManager = [NSFileManager defaultManager];
+        NSString *docPath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)[0];
+        NSString *dirPath = [docPath stringByAppendingPathComponent:@"Beacon1"];
+        BOOL isDir;
+        if (![fileManager fileExistsAtPath:dirPath isDirectory:&isDir]) {
+            [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+            CKDatabase *database = [[CKContainer defaultContainer] publicCloudDatabase];
+            CKRecordID *recordId = [[CKRecordID alloc] initWithRecordName: @"Beacon1"];
+            [database fetchRecordWithID:recordId completionHandler:^(CKRecord * _Nullable record, NSError * _Nullable error) {
+                
+                if (error) {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [MBProgressHUD hideHUDForView:self.view animated:YES];
+                        [self showAlertWithTitle:@"Fail" message:error.localizedDescription delegate:nil];
+                        
+                    });
+                }
+                else{
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        
+                        //   [self showAlertWithTitle:[NSString stringWithFormat:@"%@", results[0].recordID] message:@"Record is successfully fetched" delegate:nil];
+                        [self.imageArray removeAllObjects];
+                        //CKRecord *record = results[0];
+                        for (int i=0; i <6; i++ ) {
+                            
+                            CKAsset *asset = [record objectForKey:[NSString stringWithFormat:@"Image%d",i+1]];
+                            if (asset) {
+                                
+                                NSString *dirPath = [docPath stringByAppendingPathComponent:@"Beacon1"];
+                                BOOL isDir1;
+                                if (![fileManager fileExistsAtPath:dirPath isDirectory:&isDir1]) {
+                                    
+                                    [fileManager createDirectoryAtPath:dirPath withIntermediateDirectories:NO attributes:nil error:nil];
+                                }
+                                NSString *imagePath = [dirPath stringByAppendingPathComponent:[NSString stringWithFormat:@"Image%d",i+1]];
+                                [fileManager copyItemAtPath:asset.fileURL.path toPath:imagePath error:nil];
+                                
+                                [self.imageArray addObject:imagePath];
+                            }
+                        }
+                        
+                        
+                        [MBProgressHUD hideHUDForView:self.view animated:YES];
+                        self.productId.text   =  @"Beacon1";
+                        self.productDescription.text = [record objectForKey:@"Description"];
+                        NSUserDefaults *userDefaults =  [NSUserDefaults standardUserDefaults];
+                        [userDefaults setObject:[record objectForKey:@"Description"] forKey:@"Beacon1"];
+                        [userDefaults synchronize];
+                        self.pageControl.numberOfPages = self.imageArray.count;
+                        [self.collectionView reloadData];
+                                                
+                    });
+                }
+            }];
+        }
+        else{
+            [self.imageArray removeAllObjects];
+            NSArray *images = [fileManager contentsOfDirectoryAtPath:dirPath error:nil];
+            for (NSString *image in images) {
+                
+                [self.imageArray addObject:[dirPath stringByAppendingPathComponent:image]];
+            }
+            self.productId.text   =  @"Beacon1";
+            NSUserDefaults *userDefaults =  [NSUserDefaults standardUserDefaults];
+            self.productDescription.text =[userDefaults valueForKey:@"Beacon1"];
+             self.pageControl.numberOfPages = self.imageArray.count;
+            [self.collectionView reloadData];
+        }
+    }
     
 }
 - (IBAction)linkAction:(id)sender {
@@ -117,6 +123,11 @@
     [fileManager removeItemAtPath:[docPath stringByAppendingPathComponent:@"Beacon1"] error:nil];
     [fileManager removeItemAtPath:[docPath stringByAppendingPathComponent:@"Beacon2"] error:nil];
     [fileManager removeItemAtPath:[docPath stringByAppendingPathComponent:@"Beacon3"] error:nil];
+    [self.imageArray removeAllObjects];
+    self.pageControl.numberOfPages = 0;
+    [self.collectionView reloadData];
+    [self.navigationController popViewControllerAnimated:YES];
+
 }
 - (IBAction)valueChanged:(id)sender {
     [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:self.pageControl.currentPage inSection:0] atScrollPosition:UICollectionViewScrollPositionCenteredHorizontally animated:YES];
@@ -247,7 +258,7 @@
                                          //CKRecord *record = results[0];
                                          for (int i=0; i <6; i++ ) {
                                              
-                                             CKAsset *asset = [record objectForKey:[NSString stringWithFormat:@"Image%d",i]];
+                                             CKAsset *asset = [record objectForKey:[NSString stringWithFormat:@"Image%d",i+1]];
                                              if (asset) {
                                                  
                                                  NSString *dirPath = [docPath stringByAppendingPathComponent:@"Beacon2"];
@@ -267,6 +278,9 @@
                                          [MBProgressHUD hideHUDForView:self.view animated:YES];
                                          self.productId.text   =  @"Beacon2";
                                          self.productDescription.text = [record objectForKey:@"Description"];
+                                         NSUserDefaults *userDefaults =  [NSUserDefaults standardUserDefaults];
+                                         [userDefaults setObject:[record objectForKey:@"Description"] forKey:@"Beacon2"];
+                                         [userDefaults synchronize];
                                           self.pageControl.numberOfPages = self.imageArray.count;
                                          [self.collectionView reloadData];
                                          
@@ -283,6 +297,8 @@
                                  [self.imageArray addObject:[dirPath stringByAppendingPathComponent:image]];
                              }
                               self.productId.text   =  @"Beacon2";
+                             NSUserDefaults *userDefaults =  [NSUserDefaults standardUserDefaults];
+                             self.productDescription.text =[userDefaults valueForKey:@"Beacon2"];
                               self.pageControl.numberOfPages = self.imageArray.count;
                              [self.collectionView reloadData];
                          }
@@ -315,7 +331,7 @@
                                          //CKRecord *record = results[0];
                                          for (int i=0; i <6; i++ ) {
                                              
-                                             CKAsset *asset = [record objectForKey:[NSString stringWithFormat:@"Image%d",i]];
+                                             CKAsset *asset = [record objectForKey:[NSString stringWithFormat:@"Image%d",i+1]];
                                              if (asset) {
                                                  
                                                  NSString *dirPath = [docPath stringByAppendingPathComponent:@"Beacon3"];
@@ -335,6 +351,9 @@
                                          [MBProgressHUD hideHUDForView:self.view animated:YES];
                                          self.productId.text   =  @"Beacon3";
                                          self.productDescription.text = [record objectForKey:@"Description"];
+                                         NSUserDefaults *userDefaults =  [NSUserDefaults standardUserDefaults];
+                                         [userDefaults setObject:[record objectForKey:@"Description"] forKey:@"Beacon3"];
+                                         [userDefaults synchronize];
                                           self.pageControl.numberOfPages = self.imageArray.count;
                                          [self.collectionView reloadData];
                                          
@@ -351,6 +370,8 @@
                                  [self.imageArray addObject:[dirPath stringByAppendingPathComponent:image]];
                              }
                               self.productId.text   =  @"Beacon3";
+                             NSUserDefaults *userDefaults =  [NSUserDefaults standardUserDefaults];
+                             self.productDescription.text =[userDefaults valueForKey:@"Beacon3"];
                               self.pageControl.numberOfPages = self.imageArray.count;
                              [self.collectionView reloadData];
                          }
@@ -382,7 +403,7 @@
                                          //CKRecord *record = results[0];
                                          for (int i=0; i <6; i++ ) {
                                              
-                                             CKAsset *asset = [record objectForKey:[NSString stringWithFormat:@"Image%d",i]];
+                                             CKAsset *asset = [record objectForKey:[NSString stringWithFormat:@"Image%d",i+1]];
                                              if (asset) {
                                                  
                                                  NSString *dirPath = [docPath stringByAppendingPathComponent:@"Beacon1"];
@@ -402,6 +423,9 @@
                                          [MBProgressHUD hideHUDForView:self.view animated:YES];
                                          self.productId.text   =  @"Beacon1";
                                          self.productDescription.text = [record objectForKey:@"Description"];
+                                         NSUserDefaults *userDefaults =  [NSUserDefaults standardUserDefaults];
+                                         [userDefaults setObject:[record objectForKey:@"Description"] forKey:@"Beacon1"];
+                                         [userDefaults synchronize];
                                           self.pageControl.numberOfPages = self.imageArray.count;
                                          [self.collectionView reloadData];
                                          
@@ -418,6 +442,8 @@
                                  [self.imageArray addObject:[dirPath stringByAppendingPathComponent:image]];
                              }
                               self.productId.text   =  @"Beacon1";
+                             NSUserDefaults *userDefaults =  [NSUserDefaults standardUserDefaults];
+                             self.productDescription.text =[userDefaults valueForKey:@"Beacon1"];
                               self.pageControl.numberOfPages = self.imageArray.count;
                              [self.collectionView reloadData];
                          }

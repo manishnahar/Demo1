@@ -17,6 +17,7 @@
 @property (weak, nonatomic) IBOutlet UITextView *descriptionView;
 @property (weak, nonatomic) IBOutlet UIImageView *imageView;
 @property (weak, nonatomic) IBOutlet UICollectionView *collectionview;
+@property (strong, nonatomic) NSMutableArray *imageArray;
 
 @end
 
@@ -25,6 +26,86 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
+    self.imageArray = [NSMutableArray array];
+    NSString *imagePath = [[NSBundle mainBundle] pathForResource:@"imageplace" ofType:@"png"];
+    for (int i = 0; i < 6; i++) {
+        
+        [self.imageArray addObject:imagePath];
+    }
+    [self showBeaconImages];
+
+    UITapGestureRecognizer *tapRec = [[UITapGestureRecognizer alloc]
+                                      initWithTarget:self action:@selector(tap:)];
+    tapRec.cancelsTouchesInView = NO;
+    [self.view addGestureRecognizer: tapRec];
+
+}
+
+-(void)tap:(UITapGestureRecognizer *)tapRec{
+    [[self view] endEditing: YES];
+}
+
+-(void)showBeaconImages{
+    
+            NSFileManager *fileManager = [NSFileManager defaultManager];
+            NSString *docPath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)[0];
+            NSString *dirPath = [docPath stringByAppendingPathComponent:self.beaconInfo.beaconName];
+            BOOL isDir;
+            if (![fileManager fileExistsAtPath:dirPath isDirectory:&isDir]) {
+                [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+                CKDatabase *database = [[CKContainer defaultContainer] publicCloudDatabase];
+                CKRecordID *recordId = [[CKRecordID alloc] initWithRecordName: self.beaconInfo.beaconName];
+                [database fetchRecordWithID:recordId completionHandler:^(CKRecord * _Nullable record, NSError * _Nullable error) {
+    
+                    if (error) {
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            [MBProgressHUD hideHUDForView:self.view animated:YES];
+                            [self showAlertWithTitle:@"Fail" message:error.localizedDescription delegate:nil];
+    
+                        });
+                    }
+                    else{
+                        dispatch_async(dispatch_get_main_queue(), ^{
+    
+   
+                            for (int i=0; i <6; i++ ) {
+    
+                                CKAsset *asset = [record objectForKey:[NSString stringWithFormat:@"Image%d",i+1]];
+                                if (asset) {
+    
+                                    NSString *dirPath = [docPath stringByAppendingPathComponent:self.beaconInfo.beaconName];
+                                    BOOL isDir1;
+                                    if (![fileManager fileExistsAtPath:dirPath isDirectory:&isDir1]) {
+    
+                                        [fileManager createDirectoryAtPath:dirPath withIntermediateDirectories:NO attributes:nil error:nil];
+                                    }
+                                    NSString *imagePath = [dirPath stringByAppendingPathComponent:[NSString stringWithFormat:@"Image%d",i+1]];
+                                    [fileManager copyItemAtPath:asset.fileURL.path toPath:imagePath error:nil];
+    
+                                    [self.imageArray replaceObjectAtIndex:i withObject:imagePath];
+                                }
+                            }
+                            
+    
+                            [MBProgressHUD hideHUDForView:self.view animated:YES];
+                            self.descriptionView.text = [record objectForKey:@"Description"];
+                            [self.collectionview reloadData];
+    
+    
+                        });
+                    }
+                }];
+            }
+            else{
+                NSArray *images = [fileManager contentsOfDirectoryAtPath:dirPath error:nil];
+                for (int i = 0 ; i <images.count; i++) {
+    
+                     [self.imageArray replaceObjectAtIndex:i withObject:[dirPath stringByAppendingPathComponent:images[i]]];
+                }
+                NSUserDefaults *userDefaults =  [NSUserDefaults standardUserDefaults];
+                self.descriptionView.text =[userDefaults valueForKey:self.beaconInfo.beaconName];
+                [self.collectionview reloadData];
+            }
 }
 
 - (void)didReceiveMemoryWarning {
@@ -161,6 +242,7 @@
         }
         ImageCollectionViewCell * cell = (ImageCollectionViewCell*)[self.collectionview cellForItemAtIndexPath:[[self.collectionview indexPathsForSelectedItems] objectAtIndex:0]];
         cell.imageview.image = self.productImage;
+        cell.cancelButton.hidden = NO;
         cell.isImageVisible = YES;
 
         self.imageView.image = self.productImage;
@@ -244,6 +326,10 @@
                     NSString *productImageKey = [NSString stringWithFormat:@"Image%d",i+1];
                     productRecord[productImageKey] = productImage;
                 }
+                else{
+                    NSString *productImageKey = [NSString stringWithFormat:@"Image%d",i+1];
+                    productRecord[productImageKey] = nil;
+                }
             }
 
             [database fetchRecordWithID:recordId completionHandler:^(CKRecord * _Nullable record, NSError * _Nullable error) {
@@ -282,6 +368,7 @@
                             record[productImageKey] = productImage;
                         }
                     }
+                     record[@"Description"] = self.descriptionView.text;
                 [database saveRecord:record completionHandler:^(CKRecord * _Nullable record, NSError * _Nullable error) {
 
                     if (error) {
@@ -293,7 +380,12 @@
                             
                             [self showAlertWithTitle:@"Success" message:@"Record is successfully saved" delegate:nil];
                             [MBProgressHUD hideHUDForView:self.view animated:YES];
-
+                            NSFileManager *fileManager = [NSFileManager defaultManager];
+                            NSString *docPath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)[0];
+                            [fileManager removeItemAtPath:[docPath stringByAppendingPathComponent:self.beaconInfo.beaconName] error:nil];
+                            NSUserDefaults *userDefaults =  [NSUserDefaults standardUserDefaults];
+                            [userDefaults setObject:self.descriptionView.text forKey:self.beaconInfo.beaconName];
+                            [userDefaults synchronize];
                         });
                     }
                 }];
@@ -307,19 +399,35 @@
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section{
     
-    return  6;
+    return  self.imageArray.count;
 }
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath{
     
     ImageCollectionViewCell *collectionViewCell = [collectionView dequeueReusableCellWithReuseIdentifier:@"ImageCollectionViewCell" forIndexPath:indexPath];
-    collectionViewCell.imageview.image = [UIImage imageNamed:@"imageplace"];
+    
+    collectionViewCell.imageview.image = [UIImage imageWithContentsOfFile:self.imageArray[indexPath.row]];
+    if ([self.imageArray[indexPath.row] rangeOfString:@"imageplace"].length > 0) {
+        collectionViewCell.cancelButton.hidden = YES;
+    }
+    else{
+        collectionViewCell.cancelButton.hidden = NO;
+        
+    }
+    collectionViewCell.cancelButton.tag = indexPath.row;
     return collectionViewCell;
 }
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath{
     
-    [self pickPhoto:nil];
+     ImageCollectionViewCell * cell = (ImageCollectionViewCell*)[self.collectionview cellForItemAtIndexPath:indexPath];
+    if (cell.cancelButton.hidden) {
+         [self pickPhoto:nil];
+    }
+    else{
+        self.imageView.image = cell.imageview.image;
+    }
+   
 }
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout
@@ -347,6 +455,14 @@
     }
     
 }
+- (IBAction)cancelAction:(id)sender {
+    
+    UIButton *button = (UIButton*)sender;
+     NSString *imagePath = [[NSBundle mainBundle] pathForResource:@"imageplace" ofType:@"png"];
+    [self.imageArray replaceObjectAtIndex:button.tag withObject:imagePath];
+    [self.collectionview reloadData];
+}
+
 
 
 /*
